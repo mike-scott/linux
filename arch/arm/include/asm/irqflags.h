@@ -168,8 +168,23 @@ static inline unsigned long arch_local_save_flags(void)
 #define arch_local_irq_restore arch_local_irq_restore
 static inline void arch_local_irq_restore(unsigned long flags)
 {
+#if defined(CONFIG_ARCH_BCM2835)
+	unsigned long temp = 0;
+	flags &= ~(1 << 6);
+	asm volatile (
+		" mrs %0, cpsr"
+		: "=r" (temp)
+		:
+		: "memory", "cc");
+		/* Preserve FIQ bit */
+		temp &= (1 << 6);
+		flags = flags | temp;
+	asm volatile (
+		"    msr    cpsr_c, %0    @ local_irq_restore"
+#else
 	asm volatile(
 		"	msr	" IRQMASK_REG_NAME_W ", %0	@ local_irq_restore"
+#endif
 		:
 		: "r" (flags)
 		: "memory", "cc");
