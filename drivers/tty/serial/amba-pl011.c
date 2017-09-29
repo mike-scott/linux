@@ -1385,6 +1385,9 @@ static bool pl011_tx_char(struct uart_amba_port *uap, unsigned char c,
 		return false; /* unable to transmit character */
 
 	pl011_write(c, uap, REG_DR);
+#if defined(CONFIG_ARCH_BCM2835)
+	mb();
+#endif
 	uap->port.icount.tx++;
 
 	return true;
