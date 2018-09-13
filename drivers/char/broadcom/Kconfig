@@ -21,8 +21,6 @@ config BCM_VCIO
 	help
 	  Gives access to the mailbox property channel from userspace.
 
-endif
-
 config BCM_VC_SM
 	bool "VMCS Shared Memory"
 	depends on BCM2835_VCHIQ
@@ -57,3 +55,5 @@ config ARGON_MEM
 		This driver provides a character device interface for memory-map operations
 		so userspace tools can access the control and status registers of the Argon
 		video decoder hardware.
+
+endif
