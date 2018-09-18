@@ -182,6 +182,13 @@
 			status = "disabled";
 		};
 	};
+
+	__overrides__ {
+		cam0-pwdn-ctrl;
+		cam0-pwdn;
+		cam0-led-ctrl;
+		cam0-led;
+	};
 };
 
 &vc4 {
