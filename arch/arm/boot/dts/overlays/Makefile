@@ -119,6 +119,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	pwm-ir-tx.dtbo \
 	qca7000.dtbo \
 	rotary-encoder.dtbo \
+	rpi-7inch.dtbo \
 	rpi-7inch-flip.dtbo \
 	rpi-backlight.dtbo \
 	rpi-cirrus-wm5102.dtbo \
