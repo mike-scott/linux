@@ -197,7 +197,14 @@ int xhci_reset(struct xhci_hcd *xhci)
 		udelay(1000);
 
 	ret = xhci_handshake(&xhci->op_regs->command,
+#if defined(CONFIG_ARCH_BCM2835)
+			/* Hack: reduce handshake timeout from 10s 0.5s due
+			 * to unprogrammed vl805
+			 */
+			CMD_RESET, 0, 500 * 1000);
+#else
 			CMD_RESET, 0, 10 * 1000 * 1000);
+#endif
 	if (ret)
 		return ret;
 
