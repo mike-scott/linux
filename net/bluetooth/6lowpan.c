@@ -37,7 +37,6 @@ static struct dentry *lowpan_control_debugfs;
 
 struct skb_cb {
 	struct in6_addr addr;
-	struct in6_addr gw;
 	struct l2cap_chan *chan;
 };
 #define lowpan_cb(skb) ((struct skb_cb *)((skb)->cb))
@@ -187,21 +186,12 @@ static inline struct lowpan_peer *peer_lookup_dst(struct lowpan_btle_dev *dev,
 	}
 
 	if (!rt) {
-		nexthop = &lowpan_cb(skb)->gw;
-
-		if (ipv6_addr_any(nexthop))
-			return NULL;
+		nexthop = daddr;
 	} else {
 		nexthop = rt6_nexthop(rt, daddr);
-
-		/* We need to remember the address because it is needed
-		 * by bt_xmit() when sending the packet. In bt_xmit(), the
-		 * destination routing info is not set.
-		 */
-		memcpy(&lowpan_cb(skb)->gw, nexthop, sizeof(struct in6_addr));
 	}
 
-	BT_DBG("gw %pI6c", nexthop);
+	BT_DBG("nexthop %pI6c", nexthop);
 
 	rcu_read_lock();
 
@@ -990,11 +980,18 @@ static int get_l2cap_conn(char *buf, bdaddr_t *addr, u8 *addr_type,
 	struct hci_conn *hcon;
 	struct hci_dev *hdev;
 	int n;
+	u8 lookup_type;
 
 	n = sscanf(buf, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx %hhu",
 		   &addr->b[5], &addr->b[4], &addr->b[3],
 		   &addr->b[2], &addr->b[1], &addr->b[0],
 		   addr_type);
+	/* Convert from L2CAP channel address type to HCI address type
+	*/
+	if (*addr_type == BDADDR_LE_PUBLIC)
+		lookup_type = ADDR_LE_DEV_PUBLIC;
+	else
+		lookup_type = ADDR_LE_DEV_RANDOM;
 
 	if (n < 7)
 		return -EINVAL;
@@ -1005,7 +1002,7 @@ static int get_l2cap_conn(char *buf, bdaddr_t *addr, u8 *addr_type,
 		return -ENOENT;
 
 	hci_dev_lock(hdev);
-	hcon = hci_conn_hash_lookup_le(hdev, addr, *addr_type);
+	hcon = hci_conn_hash_lookup_le(hdev, addr, lookup_type);
 	hci_dev_unlock(hdev);
 
 	if (!hcon)
