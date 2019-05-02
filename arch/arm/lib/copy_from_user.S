@@ -100,9 +100,13 @@ ENTRY(arm_copy_from_user)
 	csdb
 #endif
 
+ENTRY(__copy_from_user_std)
+WEAK(arm_copy_from_user)
+
 #include "copy_template.S"
 
 ENDPROC(arm_copy_from_user)
+ENDPROC(__copy_from_user_std)
 
 	.pushsection .fixup,"ax"
 	.align 0
