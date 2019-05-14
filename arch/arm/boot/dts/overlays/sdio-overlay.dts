@@ -4,7 +4,7 @@
 /* Enable SDIO from MMC interface via various GPIO groups */
 
 /{
-	compatible = "brcm,bcm2708";
+	compatible = "brcm,bcm2835";
 
 	fragment@0 {
 		target = <&mmcnr>;
