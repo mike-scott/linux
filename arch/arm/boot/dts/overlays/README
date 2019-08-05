@@ -1200,6 +1200,8 @@ Info:   Enable the i2c3 bus
 Load:   dtoverlay=i2c3,<param>
 Params: pins_2_3                Use GPIOs 2 and 3
         pins_4_5                Use GPIOs 4 and 5 (default)
+        baudrate                Set the baudrate for the interface (default
+                                "100000")
 
 
 Name:   i2c4
@@ -1207,6 +1209,8 @@ Info:   Enable the i2c4 bus
 Load:   dtoverlay=i2c4,<param>
 Params: pins_6_7                Use GPIOs 6 and 7
         pins_8_9                Use GPIOs 8 and 9 (default)
+        baudrate                Set the baudrate for the interface (default
+                                "100000")
 
 
 Name:   i2c5
@@ -1214,6 +1218,8 @@ Info:   Enable the i2c5 bus
 Load:   dtoverlay=i2c5,<param>
 Params: pins_10_11              Use GPIOs 10 and 11
         pins_12_13              Use GPIOs 12 and 13 (default)
+        baudrate                Set the baudrate for the interface (default
+                                "100000")
 
 
 Name:   i2c6
@@ -1221,6 +1227,8 @@ Info:   Enable the i2c6 bus
 Load:   dtoverlay=i2c6,<param>
 Params: pins_0_1                Use GPIOs 0 and 1
         pins_22_23              Use GPIOs 22 and 23 (default)
+        baudrate                Set the baudrate for the interface (default
+                                "100000")
 
 
 Name:   i2s-gpio28-31
