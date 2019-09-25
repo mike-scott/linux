@@ -397,7 +397,11 @@ int dma_direct_supported(struct device *dev, u64 mask)
 	if (IS_ENABLED(CONFIG_ZONE_DMA))
 		min_mask = DMA_BIT_MASK(ARCH_ZONE_DMA_BITS);
 	else
+#if defined(CONFIG_ARCH_BCM2835)
+		min_mask = DMA_BIT_MASK(30);
+#else
 		min_mask = DMA_BIT_MASK(32);
+#endif
 
 	min_mask = min_t(u64, min_mask, (max_pfn - 1) << PAGE_SHIFT);
 
