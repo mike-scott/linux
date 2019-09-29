@@ -15,6 +15,9 @@
 static struct usb_device_id whitelist_table[] = {
 
 /* hubs are optional in OTG, but very handy ... */
+#if defined(CONFIG_ARCH_BCM2835)
+{ USB_DEVICE( 0x0000, 0x0000 ), }, /* Root HUB Only*/
+#else
 { USB_DEVICE_INFO(USB_CLASS_HUB, 0, 0), },
 { USB_DEVICE_INFO(USB_CLASS_HUB, 0, 1), },
 
@@ -38,9 +41,29 @@ static struct usb_device_id whitelist_table[] = {
 /* gadget zero, for testing */
 { USB_DEVICE(0x0525, 0xa4a0), },
 #endif
+#endif
+
+#if defined(CONFIG_ARCH_BCM2835)
+/* Sony cameras */
+{ USB_DEVICE_VER(0x054c,0x0010,0x0410, 0x0500), },
+{ USB_DEVICE( 0x0EA0, 0x2168 ), }, /* Ours Technology Inc. (BUFFALO ClipDrive)*/
+#endif
 
 { }	/* Terminating entry */
 };
+
+static inline void report_errors(struct usb_device *dev)
+{
+	/* OTG MESSAGE: report errors here, customize to match your product */
+	dev_info(&dev->dev, "device Vendor:%04x Product:%04x is not supported\n",
+		 le16_to_cpu(dev->descriptor.idVendor),
+		 le16_to_cpu(dev->descriptor.idProduct));
+        if (USB_CLASS_HUB == dev->descriptor.bDeviceClass){
+                dev_printk(KERN_CRIT, &dev->dev, "Unsupported Hub Topology\n");
+        } else {
+                dev_printk(KERN_CRIT, &dev->dev, "Attached Device is not Supported\n");
+        }
+}
 
 static int is_targeted(struct usb_device *dev)
 {
@@ -91,15 +114,58 @@ static int is_targeted(struct usb_device *dev)
 			continue;
 
 		return 1;
+#if defined(CONFIG_ARCH_BCM2835)
+		/* NOTE: can't use usb_match_id() since interface caches
+		 * aren't set up yet. this is cut/paste from that code.
+		 */
+		for (id = whitelist_table; id->match_flags; id++) {
+#ifdef DEBUG
+			dev_dbg(&dev->dev,
+				"ID: V:%04x P:%04x DC:%04x SC:%04x PR:%04x \n",
+				id->idVendor,
+				id->idProduct,
+				id->bDeviceClass,
+				id->bDeviceSubClass,
+				id->bDeviceProtocol);
+#endif
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_VENDOR) &&
+			    id->idVendor != le16_to_cpu(dev->descriptor.idVendor))
+				continue;
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_PRODUCT) &&
+			    id->idProduct != le16_to_cpu(dev->descriptor.idProduct))
+				continue;
+
+			/* No need to test id->bcdDevice_lo != 0, since 0 is never
+			   greater than any unsigned number. */
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_LO) &&
+			    (id->bcdDevice_lo > le16_to_cpu(dev->descriptor.bcdDevice)))
+				continue;
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_HI) &&
+			    (id->bcdDevice_hi < le16_to_cpu(dev->descriptor.bcdDevice)))
+				continue;
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_CLASS) &&
+			    (id->bDeviceClass != dev->descriptor.bDeviceClass))
+				continue;
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_SUBCLASS) &&
+			    (id->bDeviceSubClass != dev->descriptor.bDeviceSubClass))
+				continue;
+
+			if ((id->match_flags & USB_DEVICE_ID_MATCH_DEV_PROTOCOL) &&
+			    (id->bDeviceProtocol != dev->descriptor.bDeviceProtocol))
+				continue;
+
+			return 1;
+		}
+#endif
 	}
 
 	/* add other match criteria here ... */
-
-
-	/* OTG MESSAGE: report errors here, customize to match your product */
-	dev_err(&dev->dev, "device v%04x p%04x is not supported\n",
-		le16_to_cpu(dev->descriptor.idVendor),
-		le16_to_cpu(dev->descriptor.idProduct));
+	report_errors(dev);
 
 	return 0;
 }

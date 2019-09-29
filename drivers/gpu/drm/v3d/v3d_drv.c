@@ -66,7 +66,7 @@ static int v3d_runtime_resume(struct device *dev)
 }
 #endif
 
-static const struct dev_pm_ops v3d_v3d_pm_ops = {
+static const struct dev_pm_ops v3d_pm_ops = {
 	SET_RUNTIME_PM_OPS(v3d_runtime_suspend, v3d_runtime_resume, NULL)
 };
 
@@ -219,6 +219,7 @@ static struct drm_driver v3d_drm_driver = {
 static const struct of_device_id v3d_of_match[] = {
 	{ .compatible = "brcm,7268-v3d" },
 	{ .compatible = "brcm,7278-v3d" },
+	{ .compatible = "brcm,2711-v3d" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, v3d_of_match);
@@ -359,6 +360,7 @@ static struct platform_driver v3d_platform_driver = {
 	.driver		= {
 		.name	= "v3d",
 		.of_match_table = v3d_of_match,
+		.pm = &v3d_pm_ops,
 	},
 };
 
